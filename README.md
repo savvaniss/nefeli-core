@@ -128,3 +128,9 @@ This project is licensed under the GNU General Public License v3.0 (GPL-3.0). Se
 ## Acknowledgments
 
 Nefeli is a fork of the [Wownero cryptocurrency](https://codeberg.org/wownero/wownero), originally developed by the Wownero community. We acknowledge their incredible work in building the foundation of this project.
+
+
+## building from source
+
+- git clone 
+- sudo apt install -y libunbound-dev
