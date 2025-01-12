@@ -7,7 +7,7 @@
 #include "device/device.hpp"                             // for account_base::generate (if needed)
 
 // Header for epee::string_tools
-#include "epee/string_tools.h"     // for epee::string_tools::buff_to_hex_nodelimer
+#include "string_tools.h"     // for epee::string_tools::buff_to_hex_nodelimer
 
 int main()
 {
