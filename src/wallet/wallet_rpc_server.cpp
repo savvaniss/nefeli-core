@@ -68,7 +68,7 @@ using namespace epee;
     if (m_wallet->multisig() && !m_wallet->is_multisig_enabled()) \
     { \
       er.code = WALLET_RPC_ERROR_CODE_DISABLED; \
-      er.message = "This wallet is multisig, and multisig is disabled. Multisig is an experimental feature and may have bugs. Things that could go wrong include: funds sent to a multisig wallet can't be spent at all, can only be spent with the participation of a malicious group member, or can be stolen by a malicious group member. You can enable it by running this once in wownero-wallet-cli: set enable-multisig-experimental 1"; \
+      er.message = "This wallet is multisig, and multisig is disabled. Multisig is an experimental feature and may have bugs. Things that could go wrong include: funds sent to a multisig wallet can't be spent at all, can only be spent with the participation of a malicious group member, or can be stolen by a malicious group member. You can enable it by running this once in nefeli-wallet-cli: set enable-multisig-experimental 1"; \
       return false; \
     } \
   } while(0)
@@ -244,7 +244,7 @@ namespace tools
           string_encoding::base64_encode(rand_128bit.data(), rand_128bit.size())
         );
 
-        std::string temp = "wownero-wallet-rpc." + bind_port + ".login";
+        std::string temp = "nefeli-wallet-rpc." + bind_port + ".login";
         rpc_login_file = tools::private_file::drop_and_recreate(temp);
         if (!rpc_login_file.handle())
         {
@@ -320,7 +320,7 @@ namespace tools
       MINFO("The daemon is not set up to background mine.");
       MINFO("With background mining enabled, the daemon will mine when idle and not on battery.");
       MINFO("Enabling this supports the network you are using, and makes you eligible for receiving new WOW");
-      MINFO("Set setup-background-mining to 1 in wownero-wallet-cli to change.");
+      MINFO("Set setup-background-mining to 1 in nefeli-wallet-cli to change.");
       return;
     }
 
@@ -4785,12 +4785,12 @@ int main(int argc, char** argv) {
   bool should_terminate = false;
   std::tie(vm, should_terminate) = wallet_args::main(
     argc, argv,
-    "wownero-wallet-rpc [--wallet-file=<file>|--generate-from-json=<file>|--wallet-dir=<directory>] [--rpc-bind-port=<port>]",
-    tools::wallet_rpc_server::tr("This is the RPC wownero wallet. It needs to connect to a wownero\ndaemon to work correctly."),
+    "nefeli-wallet-rpc [--wallet-file=<file>|--generate-from-json=<file>|--wallet-dir=<directory>] [--rpc-bind-port=<port>]",
+    tools::wallet_rpc_server::tr("This is the RPC nefeli wallet. It needs to connect to a nefeli\ndaemon to work correctly."),
     desc_params,
     po::positional_options_description(),
     [](const std::string &s, bool emphasis){ tools::scoped_message_writer(emphasis ? epee::console_color_white : epee::console_color_default, true) << s; },
-    "wownero-wallet-rpc.log",
+    "nefeli-wallet-rpc.log",
     true
   );
   if (!vm)

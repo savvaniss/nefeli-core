@@ -42,25 +42,25 @@ RUN set -ex && \
 COPY --from=builder /src/build/x86_64-linux-gnu/release/bin /usr/local/bin/
 
 # Create wownero user
-RUN adduser --system --group --disabled-password wownero && \
-	mkdir -p /wallet /home/wownero/.wownero && \
-	chown -R wownero:wownero /home/wownero/.wownero && \
-	chown -R wownero:wownero /wallet
+RUN adduser --system --group --disabled-password nefeli && \
+	mkdir -p /wallet /home/nefeli/.nefeli && \
+	chown -R nefeli:nefeli /home/nefeli/.nefeli && \
+	chown -R nefeli:nefeli /wallet
 
 # Contains the blockchain
-VOLUME /home/wownero/.wownero
+VOLUME /home/nefeli/.nefeli
 
 # Generate your wallet via accessing the container and run:
 # cd /wallet
-# wownero-wallet-cli
+# nefeli-wallet-cli
 VOLUME /wallet
 
-EXPOSE 34567
-EXPOSE 34568
+EXPOSE 61240
+EXPOSE 61241
 
 # switch to user wownero
 USER wownero
 
 ENTRYPOINT ["nefelid"]
-CMD ["--p2p-bind-ip=0.0.0.0", "--p2p-bind-port=34567", "--rpc-bind-ip=0.0.0.0", "--rpc-bind-port=34568", "--non-interactive", "--confirm-external-bind"]
+CMD ["--p2p-bind-ip=0.0.0.0", "--p2p-bind-port=61240", "--rpc-bind-ip=0.0.0.0", "--rpc-bind-port=61241", "--non-interactive", "--confirm-external-bind"]
 
