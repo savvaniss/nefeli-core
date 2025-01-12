@@ -724,15 +724,7 @@ namespace nodetool
     }
     else
     {
-      full_addrs.insert("158.69.60.225:34567");   //  explore.wownero.com
-      full_addrs.insert("159.65.91.59:34567");    //  jw
-      full_addrs.insert("51.161.131.176:34567");  //  node.suchwow.xyz
-      full_addrs.insert("88.198.199.23:34567");
-      full_addrs.insert("192.99.8.110:34567"); // node.monerodevs.org
-      full_addrs.insert("37.187.74.171"); // node2.monerodevs.org
-      full_addrs.insert("88.99.195.15"); // node3.monerodevs.org
-      full_addrs.insert("172.67.197.39:34567"); // wowmom.0z.network
-      full_addrs.insert("195.94.188.201:34567"); // spippolatori.it
+      full_addrs.insert("94.64.65.212:61240");   // 01.seed.aurelius.world the initial node.
     }
     return full_addrs;
   }
