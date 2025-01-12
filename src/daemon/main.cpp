@@ -8,11 +8,11 @@
 // 1. Redistributions of source code must retain the above copyright notice, this list of
 //    conditions and the following disclaimer.
 //
-// 2. Redistributions in binary form must reproduce the above copyright notice, this list
-//    of conditions and the following disclaimer in the documentation and/or other
+// 2. Redistributions in binary form must reproduce the above copyright notice, this list of
+//    conditions and the following disclaimer in the documentation and/or other
 //    materials provided with the distribution.
 //
-// 3. Neither the name of copyright holder nor the names of its contributors may be
+// 3. Neither the name of the copyright holder nor the names of its contributors may be
 //    used to endorse or promote products derived from this software without specific
 //    prior written permission.
 //
@@ -33,7 +33,9 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <random>  // only needed if you use random nonce
+#include <random>  // if you want a random nonce
+#include <array>
+#include <cstring> // for memcpy
 
 #include "common/command_line.h"
 #include "common/scoped_message_writer.h"
@@ -46,7 +48,7 @@
 
 #include "serialization/binary_utils.h"
 
-// This "string_tools.h" must have pod_to_hex(...) or buff_to_hex_nodelimer(...).
+// Must include a file that has buff_to_hex_nodelimer(...) or pod_to_hex(...)
 #include "string_tools.h"
 
 #include "cryptonote_basic/account.h"
@@ -152,6 +154,24 @@ static const command_line::arg_descriptor<bool> arg_print_genesis_info = {
 };
 
 //------------------------------------------------------------------
+// Helper: Copy 32 bytes of a secret key into a hex string
+//------------------------------------------------------------------
+static std::string secret_key_to_hex(const crypto::secret_key &sec_key)
+{
+  // Confirm that this secret key is 32 bytes (which it normally is)
+  static_assert(sizeof(sec_key) == 32, "secret_key must be 32 bytes");
+
+  // Copy bytes into a trivial buffer
+  std::array<uint8_t, 32> tmp{};
+  memcpy(tmp.data(), &sec_key, 32);
+
+  // Convert to hex
+  // buff_to_hex_nodelimer expects a string or pointer + length
+  const std::string raw(reinterpret_cast<const char*>(tmp.data()), tmp.size());
+  return epee::string_tools::buff_to_hex_nodelimer(raw);
+}
+
+//------------------------------------------------------------------
 // Function to generate & print genesis TX + nonce
 //------------------------------------------------------------------
 static void print_genesis_tx_and_nonce(uint8_t nettype)
@@ -164,9 +184,10 @@ static void print_genesis_tx_and_nonce(uint8_t nettype)
   account_base miner_acc;
   miner_acc.generate();
 
-  // Extract the raw spend/view keys from mlocked<...> for printing:
-  const crypto::ec_scalar raw_spend_key = miner_acc.get_keys().m_spend_secret_key.unlocked();
-  const crypto::ec_scalar raw_view_key  = miner_acc.get_keys().m_view_secret_key.unlocked();
+  // We do manual copying to avoid the .unlocked() call
+  // (which does not exist in your code)
+  const std::string spend_key_hex = secret_key_to_hex(miner_acc.get_keys().m_spend_secret_key);
+  const std::string view_key_hex  = secret_key_to_hex(miner_acc.get_keys().m_view_secret_key);
 
   // ---------------------------------------------------------
   // 2) Print the account information
@@ -177,14 +198,9 @@ static void print_genesis_tx_and_nonce(uint8_t nettype)
                                           miner_acc.get_keys().m_account_address)
             << std::endl;
 
-  // Use pod_to_hex(...) instead of epee::as_byte_span(...)
-  std::cout << "Miner spend secret key:\n"
-            << epee::string_tools::pod_to_hex(raw_spend_key)
-            << std::endl;
-  std::cout << "Miner view secret key:\n"
-            << epee::string_tools::pod_to_hex(raw_view_key)
-            << std::endl
-            << std::endl;
+  // Print the two secret keys
+  std::cout << "Miner spend secret key:\n" << spend_key_hex << std::endl;
+  std::cout << "Miner view secret key:\n"  << view_key_hex  << std::endl << std::endl;
 
   // ---------------------------------------------------------
   // 3) Save these keys to a file (optional, but recommended)
@@ -200,31 +216,28 @@ static void print_genesis_tx_and_nonce(uint8_t nettype)
       << get_account_address_as_str(static_cast<network_type>(nettype), false,
                                     miner_acc.get_keys().m_account_address)
       << std::endl
-      << "Miner spend secret key:\n"
-      << epee::string_tools::pod_to_hex(raw_spend_key)
-      << std::endl
-      << "Miner view secret key:\n"
-      << epee::string_tools::pod_to_hex(raw_view_key)
-      << std::endl;
+      << "Miner spend secret key:\n" << spend_key_hex << std::endl
+      << "Miner view secret key:\n"  << view_key_hex  << std::endl;
   ofs.close();
 
   // ---------------------------------------------------------
-  // 4) Construct the genesis transaction using the newer signature
+  // 4) Construct the genesis transaction
+  //    Make sure you're using the correct signature in your codebase
   // ---------------------------------------------------------
   transaction tx_genesis;
   bool r = construct_miner_tx(
-      /* pb                    */ nullptr,
+      /* pb                    */ nullptr,  // no Blockchain pointer
       /* network_type         */ static_cast<network_type>(nettype),
       /* height               */ 0,
       /* median_weight        */ 0,
       /* already_generated_coins */ 0,
       /* current_block_weight */ 0,
       /* fee                  */ 0,
-      /* miner_address        */ miner_acc.get_keys().m_account_address,
-      /* tx (out param)       */ tx_genesis
-      // The extra_nonce, max_outs, and hf_version use defaults
+      miner_acc.get_keys().m_account_address,
+      tx_genesis
+      // The optional extra_nonce, max_outs, and hf_version use defaults
   );
-  if(!r)
+  if (!r)
   {
     std::cerr << "Failed to construct genesis transaction" << std::endl;
     return;
