@@ -17,9 +17,50 @@ Nefeli is designed to offer fast transactions, predictable emissions, and a secu
 | **Blocks per Day**     | `24 * 60 = 1440`                |
 | **Daily Emission**     | `1440 × 1 = 1440 Nefeli`        |
 | **Annual Emission**    | `1440 × 365 = 525,600 Nefeli`   |
-| **Total Supply**       | Unlimited (optional cap later)  |
+| **Total Supply**       | predictable supply. 40 years for 21 million.|
 
 ---
+# Tokenomics: No Max Supply with Steady Emission
+
+Nefeli uses a **steady block reward** system with no maximum supply. This tokenomic model offers distinct advantages for long-term sustainability and miner incentives. Below are the key benefits of this approach:
+
+---
+
+## Pros of No Max Supply with Steady Emission
+
+### **1. Incentivizes Miners Indefinitely**
+- Mining remains attractive in the long term because block rewards never drop to zero.
+- A steady reward ensures miners have consistent incentives, which helps maintain network security.
+
+### **2. Predictable Inflation**
+The inflation rate decreases over time as the circulating supply grows, even with a fixed reward. This is because:
+\[
+\text{Inflation Rate} = \frac{\text{Block Reward} \times \text{Blocks per Year}}{\text{Total Circulating Supply}}
+\]
+
+**Example Calculations**:
+- **Year 1**: 
+  - 525,600 Nefeli emitted (1 Nefeli/block × 525,600 blocks/year)
+  - Total supply = 525,600
+  - Inflation = 100%
+- **Year 10**:
+  - 525,600 Nefeli emitted
+  - Total supply ≈ 5,256,000
+  - Inflation ≈ 10%
+- **Year 50**:
+  - Inflation approaches ~1% as the supply grows larger.
+
+### **3. Long-Term Ecosystem Stability**
+- Coins continue entering the market, supporting liquidity and activity.
+- Ensures future generations can still mine or earn Nefeli.
+
+### **4. Simplicity**
+- Easy for users and investors to understand.
+- “1 Nefeli per block, forever” is straightforward and predictable.
+
+---
+
+This model ensures the Nefeli network remains secure, liquid, and accessible while maintaining long-term sustainability. Let us know if you'd like to learn more or contribute to the Nefeli ecosystem!
 
 ## Tokenomics Summary
 
