@@ -239,9 +239,13 @@ namespace config
   uint16_t const P2P_DEFAULT_PORT = 61240;
   uint16_t const RPC_DEFAULT_PORT = 61241;
   uint16_t const ZMQ_RPC_DEFAULT_PORT = 61242;
-  boost::uuids::uuid const NETWORK_ID = { {
-      0x11, 0x33, 0xFF, 0x77 , 0x61, 0x04 , 0x41, 0x61, 0x17, 0x31, 0x00, 0x82, 0x16, 0xA1, 0xA1, 0x10
-    } }; // Bender's nightmare
+const boost::uuids::uuid NETWORK_ID = {{
+    0x83, 0x34, 0x43, 0x01,
+    0xc7, 0x4f,
+    0x46, 0xdb,
+    0xb9, 0x29,
+    0x27, 0xc4, 0x1b, 0x59, 0xa4, 0xdb
+}}; // new uuid identifier
   std::string const GENESIS_TX = "013c01ff00018094ebdc03022e93d027b898f87590a0316d940da002dc3cd4ed34837fb4582718c032c3d6cf2101cc52339a4bec439315bc51f5d4c91f4263f447a798b5039a275dbfa93b148972";
   uint32_t const GENESIS_NONCE = 10000;  
   
