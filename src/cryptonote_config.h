@@ -242,8 +242,8 @@ namespace config
   boost::uuids::uuid const NETWORK_ID = { {
       0x11, 0x33, 0xFF, 0x77 , 0x61, 0x04 , 0x41, 0x61, 0x17, 0x31, 0x00, 0x82, 0x16, 0xA1, 0xA1, 0x10
     } }; // Bender's nightmare
-  std::string const GENESIS_TX = "013c01ff0001ffffffffff1f029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807121012a1a936be5d91c01ee876e38c13fab0ee11cbe86011a2bf7740fb5ebd39d267d";
-  uint32_t const GENESIS_NONCE = 70;
+  std::string const GENESIS_TX = "010000000001ff010000000000000001029818b18a1171adf9de1a57ec9389df9fcdf0a0807c083189739838153ad5f1ef9dd1a9887a19d4582c24c8261b88d858e1780e64d44a2729ac85c2461bcb40189f9d0ff7309943046783f0fd";
+  uint32_t const GENESIS_NONCE = 75;
 
   // Hash domain separators
   const char HASH_KEY_BULLETPROOF_EXPONENT[] = "bulletproof";
