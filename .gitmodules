@@ -1,18 +1,16 @@
-[submodule "external/miniupnp"]
-	path = external/miniupnp
+[submodule "miniupnp"]
+	path = miniupnp
 	url = https://github.com/miniupnp/miniupnp
-[submodule "external/rapidjson"]
-	path = external/rapidjson
+[submodule "rapidjson"]
+	path = rapidjson
 	url = https://github.com/Tencent/rapidjson
-[submodule "external/trezor-common"]
-	active = false
-	path = external/trezor-common
+[submodule "trezor-common"]
+	path = trezor-common
 	url = https://github.com/trezor/trezor-common.git
-[submodule "external/supercop"]
-	path = external/supercop
+[submodule "supercop"]
+	path = supercop
 	url = https://github.com/monero-project/supercop
-	branch = monero
-[submodule "external/randomwow"]
-	path = external/randomwow
+[submodule "RandomWOW"]
+	path = RandomWOW
 	url = https://codeberg.org/wownero/RandomWOW
         branch = 1.2.1-wow
