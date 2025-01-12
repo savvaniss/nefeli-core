@@ -243,8 +243,8 @@ namespace config
       0x11, 0x33, 0xFF, 0x77 , 0x61, 0x04 , 0x41, 0x61, 0x17, 0x31, 0x00, 0x82, 0x16, 0xA1, 0xA1, 0x10
     } }; // Bender's nightmare
   std::string const GENESIS_TX ="013c01ff0001ffffffffffff03029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd088071210221cb1174f548421346c3a8f5e5896079fcb0d8a55958a05f50dbeaa263150226";
-  uint32_t const GENESIS_NONCE = 1582570997;
-  uint32_t const GENESIS_TIMESTAMP = 1704672000;
+  uint32_t const GENESIS_NONCE = 1582570997;  
+  
   // Hash domain separators
   const char HASH_KEY_BULLETPROOF_EXPONENT[] = "bulletproof";
   const char HASH_KEY_BULLETPROOF_PLUS_EXPONENT[] = "bulletproof_plus";

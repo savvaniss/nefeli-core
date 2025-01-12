@@ -73,3 +73,7 @@ set_property(TARGET daemon
   PROPERTY
     OUTPUT_NAME "nefelid")
 install(TARGETS daemon DESTINATION bin)
+
+
+add_executable(generate_genesis_tx generate_genesis_tx.cpp)
+target_link_libraries(generate_genesis_tx PRIVATE your_project_dependencies)
