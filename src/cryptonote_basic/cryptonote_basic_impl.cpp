@@ -129,7 +129,7 @@ namespace cryptonote {
   //------------------------------------------------------------------------------------
   uint8_t get_account_address_checksum(const public_address_outer_blob& bl)
   {
-    const unsigned char* pbuf = reinterpret_cast<const unsignd char*>(&bl);
+    const unsigned char* pbuf = reinterpret_cast<const unsigned char*>(&bl);
     uint8_t summ = 0;
     for(size_t i = 0; i!= sizeof(public_address_outer_blob)-1; i++)
       summ += pbuf[i];
@@ -328,4 +328,3 @@ bool parse_hash256(const std::string &str_hash, crypto::hash& hash)
     return true;
   }
 }
-
