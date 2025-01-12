@@ -1,6 +1,6 @@
 # Nefeli: Accessible Cryptocurrency for Human beens
 
-Nefeli is a privacy-focused cryptocurrency designed to empower individuals by ensuring mining remains accessible to everyone, not dominated by large mining farms. Forked from Wownero, Nefeli inherits its commitment to decentralization and inclusivity.
+Nefeli is a privacy-focused cryptocurrency designed to empower individuals by ensuring mining remains accessible to everyone, not dominated by large mining farms. Forked from Wownero, Nefeli inherits its commitment to decentralization and inclusivity but focuse on a scope to make Cryptocurrency mining available for all humans
 
 ## Key Features
 
