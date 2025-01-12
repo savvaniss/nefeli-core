@@ -13,4 +13,3 @@
 [submodule "RandomWOW"]
 	path = external/RandomWOW
 	url = https://codeberg.org/wownero/RandomWOW
-        branch = 1.2.1-wow
