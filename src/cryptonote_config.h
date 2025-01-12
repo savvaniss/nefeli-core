@@ -168,7 +168,8 @@
 
 #define RPC_IP_FAILS_BEFORE_BLOCK                       3
 
-#define CRYPTONOTE_NAME                         "wownero"
+#define CRYPTONOTE_NAME                         "Nefeli"
+#define CRYPTONOTE_TICKER "NEF" // Add this line for the ticker
 #define CRYPTONOTE_BLOCKCHAINDATA_FILENAME      "data.mdb"
 #define CRYPTONOTE_BLOCKCHAINDATA_LOCK_FILENAME "lock.mdb"
 #define P2P_NET_DATA_FILENAME                   "p2pstate.bin"
