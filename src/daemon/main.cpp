@@ -12,7 +12,7 @@
 //    of conditions and the following disclaimer in the documentation and/or other
 //    materials provided with the distribution.
 //
-// 3. Neither the name of the copyright holder nor the names of its contributors may be
+// 3. Neither the name of copyright holder nor the names of its contributors may be
 //    used to endorse or promote products derived from this software without specific
 //    prior written permission.
 //
@@ -28,21 +28,35 @@
 //
 // Parts of this file are originally copyright (c) 2012-2013 The Cryptonote developers
 
+#include <ctime>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <random>  // only needed if you use random nonce
+
 #include "common/command_line.h"
 #include "common/scoped_message_writer.h"
 #include "common/password.h"
 #include "common/util.h"
+
 #include "cryptonote_core/cryptonote_core.h"
 #include "cryptonote_core/cryptonote_tx_utils.h"
 #include "cryptonote_basic/cryptonote_format_utils.h"
+
 #include "serialization/binary_utils.h"
+
+// This "string_tools.h" must have pod_to_hex(...) or buff_to_hex_nodelimer(...).
 #include "string_tools.h"
+
 #include "cryptonote_basic/account.h"
 #include "cryptonote_basic/miner.h"
+
 #include "daemon/command_server.h"
 #include "daemon/daemon.h"
 #include "daemon/executor.h"
 #include "daemonizer/daemonizer.h"
+
 #include "misc_log_ex.h"
 #include "net/parse.h"
 #include "p2p/net_node.h"
@@ -61,6 +75,7 @@
 namespace po = boost::program_options;
 namespace bf = boost::filesystem;
 
+//-----------------------------------------------------------------------------------------------
 uint16_t parse_public_rpc_port(const po::variables_map &vm)
 {
   const auto &public_node_arg = daemon_args::arg_public_node;
@@ -127,118 +142,141 @@ bool isFat32(const wchar_t* root_path)
 }
 #endif
 
+//------------------------------------------------------------------
+// Option to print genesis TX and nonce
+//------------------------------------------------------------------
 static const command_line::arg_descriptor<bool> arg_print_genesis_info = {
     "print-genesis-info",
     "Print the genesis tx and nonce to console/file",
     false
 };
 
+//------------------------------------------------------------------
+// Function to generate & print genesis TX + nonce
+//------------------------------------------------------------------
 static void print_genesis_tx_and_nonce(uint8_t nettype)
 {
-    using namespace cryptonote;
+  using namespace cryptonote;
 
-    // ---------------------------------------------------------
-    // 1) Generate a new miner account
-    // ---------------------------------------------------------
-    account_base miner_acc;
-    miner_acc.generate();
+  // ---------------------------------------------------------
+  // 1) Generate a new miner account
+  // ---------------------------------------------------------
+  account_base miner_acc;
+  miner_acc.generate();
 
-    // ---------------------------------------------------------
-    // 2) Print the account information
-    // ---------------------------------------------------------
-    std::cout << "\n*** Generating miner wallet ***" << std::endl;
-    std::cout << "Miner account address:" << std::endl
-              << get_account_address_as_str((network_type)nettype, false, miner_acc.get_keys().m_account_address)
-              << std::endl;
+  // Extract the raw spend/view keys from mlocked<...> for printing:
+  const crypto::ec_scalar raw_spend_key = miner_acc.get_keys().m_spend_secret_key.unlocked();
+  const crypto::ec_scalar raw_view_key  = miner_acc.get_keys().m_view_secret_key.unlocked();
 
-    std::cout << "Miner spend secret key:" << std::endl;
-    epee::to_hex::formatted(std::cout, epee::as_byte_span(miner_acc.get_keys().m_spend_secret_key));
-    std::cout << std::endl << "Miner view secret key:" << std::endl;
-    epee::to_hex::formatted(std::cout, epee::as_byte_span(miner_acc.get_keys().m_view_secret_key));
-    std::cout << std::endl << std::endl;
+  // ---------------------------------------------------------
+  // 2) Print the account information
+  // ---------------------------------------------------------
+  std::cout << "\n*** Generating miner wallet ***" << std::endl;
+  std::cout << "Miner account address:\n"
+            << get_account_address_as_str(static_cast<network_type>(nettype), false,
+                                          miner_acc.get_keys().m_account_address)
+            << std::endl;
 
-    // ---------------------------------------------------------
-    // 3) Save these keys to a file (optional, but recommended)
-    // ---------------------------------------------------------
-    auto t = std::time(nullptr);
-    auto tm = *std::localtime(&t);
-    std::stringstream key_file_ss;
-    key_file_ss << "miner_keys_" << std::put_time(&tm, "%Y%m%d%H%M%S") << ".dat";
-    const std::string key_file_name = key_file_ss.str();
+  // Use pod_to_hex(...) instead of epee::as_byte_span(...)
+  std::cout << "Miner spend secret key:\n"
+            << epee::string_tools::pod_to_hex(raw_spend_key)
+            << std::endl;
+  std::cout << "Miner view secret key:\n"
+            << epee::string_tools::pod_to_hex(raw_view_key)
+            << std::endl
+            << std::endl;
 
-    std::ofstream ofs(key_file_name);
-    ofs << "Miner account address:\n"
-        << get_account_address_as_str((network_type)nettype, false, miner_acc.get_keys().m_account_address)
-        << std::endl
-        << "Miner spend secret key:\n";
-    epee::to_hex::formatted(ofs, epee::as_byte_span(miner_acc.get_keys().m_spend_secret_key));
-    ofs << std::endl << "Miner view secret key:\n";
-    epee::to_hex::formatted(ofs, epee::as_byte_span(miner_acc.get_keys().m_view_secret_key));
-    ofs << std::endl;
-    ofs.close();
+  // ---------------------------------------------------------
+  // 3) Save these keys to a file (optional, but recommended)
+  // ---------------------------------------------------------
+  auto t = std::time(nullptr);
+  auto tm = *std::localtime(&t);
+  std::stringstream key_file_ss;
+  key_file_ss << "miner_keys_" << std::put_time(&tm, "%Y%m%d%H%M%S") << ".dat";
+  const std::string key_file_name = key_file_ss.str();
 
-    // ---------------------------------------------------------
-    // 4) Construct the genesis transaction
-    // ---------------------------------------------------------
-    cryptonote::transaction tx_genesis;
-    construct_miner_tx(
-        /*height=*/0,
-        /*already_generated_coins=*/0,
-        /*current_block_weight=*/0,
-        /*fee=*/0,
-        /*hard_fork_version=*/0,
-        miner_acc.get_keys().m_account_address,
-        tx_genesis
-    );
+  std::ofstream ofs(key_file_name);
+  ofs << "Miner account address:\n"
+      << get_account_address_as_str(static_cast<network_type>(nettype), false,
+                                    miner_acc.get_keys().m_account_address)
+      << std::endl
+      << "Miner spend secret key:\n"
+      << epee::string_tools::pod_to_hex(raw_spend_key)
+      << std::endl
+      << "Miner view secret key:\n"
+      << epee::string_tools::pod_to_hex(raw_view_key)
+      << std::endl;
+  ofs.close();
 
-    // ---------------------------------------------------------
-    // 5) Convert that tx to raw hex suitable for GENESIS_TX
-    // ---------------------------------------------------------
-    std::stringstream ss;
-    binary_archive<true> ba(ss);
-    ::serialization::serialize(ba, tx_genesis);
-    std::string tx_hex = ss.str();
+  // ---------------------------------------------------------
+  // 4) Construct the genesis transaction using the newer signature
+  // ---------------------------------------------------------
+  transaction tx_genesis;
+  bool r = construct_miner_tx(
+      /* pb                    */ nullptr,
+      /* network_type         */ static_cast<network_type>(nettype),
+      /* height               */ 0,
+      /* median_weight        */ 0,
+      /* already_generated_coins */ 0,
+      /* current_block_weight */ 0,
+      /* fee                  */ 0,
+      /* miner_address        */ miner_acc.get_keys().m_account_address,
+      /* tx (out param)       */ tx_genesis
+      // The extra_nonce, max_outs, and hf_version use defaults
+  );
+  if(!r)
+  {
+    std::cerr << "Failed to construct genesis transaction" << std::endl;
+    return;
+  }
 
-    // ---------------------------------------------------------
-    // 6) Define or generate a nonce
-    // ---------------------------------------------------------
-    // Approach A: Fixed nonce (similar to the default Monero approach)
-    uint32_t genesis_nonce = 10000;
+  // ---------------------------------------------------------
+  // 5) Convert that tx to raw hex suitable for GENESIS_TX
+  // ---------------------------------------------------------
+  std::stringstream ss;
+  binary_archive<true> ba(ss);
+  ::serialization::serialize(ba, tx_genesis);
+  std::string tx_hex = ss.str();
 
-    // Approach B: Generate a random nonce each time (uncomment if desired)
-    /*
-    std::random_device rd;
-    std::mt19937 rng(rd());
-    std::uniform_int_distribution<uint32_t> dist;
-    uint32_t genesis_nonce = dist(rng);
-    */
+  // ---------------------------------------------------------
+  // 6) Define or generate a nonce
+  // ---------------------------------------------------------
+  // Approach A: Fixed nonce (similar to the default Monero approach)
+  uint32_t genesis_nonce = 10000;
 
-    // ---------------------------------------------------------
-    // 7) Print everything needed for cryptonote_config.h
-    // ---------------------------------------------------------
-    std::cout << "*** Insert these lines into your coin config ***\n\n";
+  // Approach B: Generate a random nonce each time (uncomment if desired)
+  /*
+  std::random_device rd;
+  std::mt19937 rng(rd());
+  std::uniform_int_distribution<uint32_t> dist;
+  uint32_t genesis_nonce = dist(rng);
+  */
 
-    // 1) GENESIS_TX
-    std::cout << "std::string const GENESIS_TX = \""
-              << epee::string_tools::buff_to_hex_nodelimer(tx_hex)
-              << "\";\n";
+  // ---------------------------------------------------------
+  // 7) Print everything needed for cryptonote_config.h
+  // ---------------------------------------------------------
+  std::cout << "*** Insert these lines into your coin config ***\n\n";
 
-    // 2) GENESIS_NONCE
-    std::cout << "#define GENESIS_NONCE " << genesis_nonce << "\n\n";
-    
-    // Optionally show the transaction JSON as well
-    std::cout << "*** Genesis transaction (JSON) ***\n"
-              << obj_to_json_str(tx_genesis) << std::endl;
+  // 1) GENESIS_TX
+  std::cout << "std::string const GENESIS_TX = \""
+            << epee::string_tools::buff_to_hex_nodelimer(tx_hex)
+            << "\";\n";
+
+  // 2) GENESIS_NONCE
+  std::cout << "#define GENESIS_NONCE " << genesis_nonce << "\n\n";
+
+  // Optionally show the JSON of the transaction
+  std::cout << "*** Genesis transaction (JSON) ***\n"
+            << obj_to_json_str(tx_genesis) << std::endl;
 }
 
+//------------------------------------------------------------------
 int main(int argc, char const * argv[])
 {
   try {
 
     // TODO parse the debug options like set log level right here at start
-
     tools::on_startup();
-
     epee::string_tools::set_module_name_and_folder(argv[0]);
 
     // Build argument description
@@ -249,13 +287,13 @@ int main(int argc, char const * argv[])
     po::positional_options_description positional_options;
     {
       // Misc Options
-
       command_line::add_arg(visible_options, command_line::arg_help);
       command_line::add_arg(visible_options, command_line::arg_version);
       command_line::add_arg(visible_options, daemon_args::arg_os_version);
       command_line::add_arg(visible_options, daemon_args::arg_config_file);
-      command_line::add_arg(visible_options, arg_print_genesis_info);
 
+      //  Add our new argument for printing genesis info:
+      command_line::add_arg(visible_options, arg_print_genesis_info);
 
       // Settings
       command_line::add_arg(core_settings, daemon_args::arg_log_file);
@@ -270,7 +308,6 @@ int main(int argc, char const * argv[])
       command_line::add_arg(core_settings, daemon_args::arg_zmq_rpc_bind_port);
       command_line::add_arg(core_settings, daemon_args::arg_zmq_pub);
       command_line::add_arg(core_settings, daemon_args::arg_zmq_rpc_disabled);
-
 
       daemonizer::init_options(hidden_options, visible_options);
       daemonize::t_executor::init_options(core_settings);
@@ -292,10 +329,9 @@ int main(int argc, char const * argv[])
     {
       boost::program_options::store(
         boost::program_options::command_line_parser(argc, argv)
-          .options(all_options).positional(positional_options).run()
-      , vm
+          .options(all_options).positional(positional_options).run(),
+        vm
       );
-
       return true;
     });
     if (!ok) return 1;
@@ -359,18 +395,12 @@ int main(int argc, char const * argv[])
 
     const bool testnet = command_line::get_arg(vm, cryptonote::arg_testnet_on);
     const bool stagenet = command_line::get_arg(vm, cryptonote::arg_stagenet_on);
-    const bool regtest = command_line::get_arg(vm, cryptonote::arg_regtest_on);
+    const bool regtest  = command_line::get_arg(vm, cryptonote::arg_regtest_on);
     if (testnet + stagenet + regtest > 1)
     {
-      std::cerr << "Can't specify more than one of --tesnet and --stagenet and --regtest" << ENDL;
+      std::cerr << "Can't specify more than one of --testnet and --stagenet and --regtest" << ENDL;
       return 1;
     }
-
-    // data_dir
-    //   default: e.g. ~/.bitmonero/ or ~/.bitmonero/testnet
-    //   if data-dir argument given:
-    //     absolute path
-    //     relative path: relative to cwd
 
     // Create data dir if it doesn't exist
     boost::filesystem::path data_dir = boost::filesystem::absolute(
@@ -383,29 +413,32 @@ int main(int argc, char const * argv[])
     }
 #endif
 
-    // FIXME: not sure on windows implementation default, needs further review
-    //bf::path relative_path_base = daemonizer::get_relative_path_base(vm);
-    bf::path relative_path_base = data_dir;
-
+    bf::path relative_path_base = data_dir; // Daemon's default data dir
     po::notify(vm);
+
+    // ---------------------------------------------------------
+    // If asked to print the genesis info, do so now & exit
+    // ---------------------------------------------------------
     if (command_line::get_arg(vm, arg_print_genesis_info))
     {
-    // 0 = MAINNET, or whatever your nettype enumerations are
-    print_genesis_tx_and_nonce(0 /* or cryptonote::MAINNET */);
-    return 0; // Then exit
+      // 0 = MAINNET in many forks, or cryptonote::MAINNET if you prefer
+      print_genesis_tx_and_nonce(0 /* or cryptonote::MAINNET */);
+      return 0;
     }
 
-    // log_file_path
-    //   default: <data_dir>/<CRYPTONOTE_NAME>.log
-    //   if log-file argument given:
-    //     absolute path
-    //     relative path: relative to data_dir
-    bf::path log_file_path {data_dir / std::string(CRYPTONOTE_NAME ".log")};
+    // log_file_path default
+    bf::path log_file_path { data_dir / std::string(CRYPTONOTE_NAME ".log") };
     if (!command_line::is_arg_defaulted(vm, daemon_args::arg_log_file))
       log_file_path = command_line::get_arg(vm, daemon_args::arg_log_file);
     if (!log_file_path.has_parent_path())
       log_file_path = bf::absolute(log_file_path, relative_path_base);
-    mlog_configure(log_file_path.string(), true, command_line::get_arg(vm, daemon_args::arg_max_log_file_size), command_line::get_arg(vm, daemon_args::arg_max_log_files));
+
+    mlog_configure(
+      log_file_path.string(),
+      /* console = */ true,
+      command_line::get_arg(vm, daemon_args::arg_max_log_file_size),
+      command_line::get_arg(vm, daemon_args::arg_max_log_files)
+    );
 
     // Set log level
     if (!command_line::is_arg_defaulted(vm, daemon_args::arg_log_level))
@@ -430,10 +463,10 @@ int main(int argc, char const * argv[])
     {
       auto command = command_line::get_arg(vm, daemon_args::arg_command);
 
-      if (command.size())
+      if (!command.empty())
       {
         const cryptonote::rpc_args::descriptors arg{};
-        auto rpc_ip_str = command_line::get_arg(vm, arg.rpc_bind_ip);
+        auto rpc_ip_str   = command_line::get_arg(vm, arg.rpc_bind_ip);
         auto rpc_port_str = command_line::get_arg(vm, cryptonote::core_rpc_server::arg_rpc_bind_port);
 
         uint32_t rpc_ip;
@@ -456,7 +489,9 @@ int main(int argc, char const * argv[])
         if (has_rpc_arg || use_rpc_env)
         {
           login = tools::login::parse(
-            has_rpc_arg ? command_line::get_arg(vm, arg.rpc_login) : std::string(env_rpc_login), false, [](bool verify) {
+            has_rpc_arg ? command_line::get_arg(vm, arg.rpc_login) : std::string(env_rpc_login),
+            /*quiet=*/ false,
+            [](bool verify) {
               PAUSE_READLINE();
               return tools::password_container::prompt(verify, "Daemon client password");
             }
@@ -468,7 +503,7 @@ int main(int argc, char const * argv[])
           }
         }
 
-        auto ssl_options = cryptonote::rpc_args::process_ssl(vm, true);
+        auto ssl_options = cryptonote::rpc_args::process_ssl(vm, /*require_ssl=*/ true);
         if (!ssl_options)
           return 1;
 
@@ -487,10 +522,9 @@ int main(int argc, char const * argv[])
     }
 
     MINFO("Moving from main() into the daemonize now.");
-
     return daemonizer::daemonize(argc, argv, daemonize::t_executor{parse_public_rpc_port(vm)}, vm) ? 0 : 1;
   }
-  catch (std::exception const & ex)
+  catch (const std::exception &ex)
   {
     LOG_ERROR("Exception in main! " << ex.what());
   }
