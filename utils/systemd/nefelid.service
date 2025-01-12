@@ -1,15 +1,15 @@
 [Unit]
-Description=Wownero Full Node
+Description=Nefeli coin Full Node
 After=network.target
 
 [Service]
-User=wownero
-Group=wownero
+User=nefeli
+Group=nefeli
 Environment="MONERO_RANDOMX_UMASK=1"
 StateDirectory=wownero
 LogsDirectory=wownero
 Type=simple
-ExecStart=/usr/local/bin/wownerod --config-file /etc/wow.conf --non-interactive
+ExecStart=/usr/local/bin/nefelid --config-file /etc/nefelid.conf --non-interactive
 WorkingDirectory=~
 Restart=always
 StandardOutput=null

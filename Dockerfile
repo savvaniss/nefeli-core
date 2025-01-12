@@ -61,6 +61,6 @@ EXPOSE 34568
 # switch to user wownero
 USER wownero
 
-ENTRYPOINT ["wownerod"]
+ENTRYPOINT ["nefelid"]
 CMD ["--p2p-bind-ip=0.0.0.0", "--p2p-bind-port=34567", "--rpc-bind-ip=0.0.0.0", "--rpc-bind-port=34568", "--non-interactive", "--confirm-external-bind"]
 

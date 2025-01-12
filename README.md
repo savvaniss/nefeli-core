@@ -133,4 +133,4 @@ Nefeli is a fork of the [Wownero cryptocurrency](https://codeberg.org/wownero/wo
 ## building from source
 
 - git clone 
-- sudo apt install -y libunbound-dev
+- sudo apt install -y libunbound-dev  libboost-all-dev
