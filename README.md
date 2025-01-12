@@ -17,7 +17,7 @@ Nefeli is designed to offer fast transactions, predictable emissions, and a secu
 | **Blocks per Day**     | `24 * 60 = 1440`                |
 | **Daily Emission**     | `1440 × 1 = 1440 Nefeli`        |
 | **Annual Emission**    | `1440 × 365 = 525,600 Nefeli`   |
-| **Total Supply**       | predictable supply. 40 years for 21 million.|
+| **Total Supply**       | predictable no max supply. 40 years for 21 million coins.|
 
 ---
 # Tokenomics: No Max Supply with Steady Emission
