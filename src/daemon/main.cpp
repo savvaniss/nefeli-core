@@ -243,6 +243,17 @@ static void print_genesis_tx_and_nonce(uint8_t nettype)
     return;
   }
 
+    //
+  // >>>>>>> FORCE THE BLOCK-0 REWARD TO ZERO <<<<<<<
+  //
+  // If construct_miner_tx generated a non-zero coinbase,
+  // we manually zero it out here:
+  //
+  if (!tx_genesis.vout.empty())
+  {
+    tx_genesis.vout[0].amount = 0;
+  }
+
   // ---------------------------------------------------------
   // 5) Convert that tx to raw hex suitable for GENESIS_TX
   // ---------------------------------------------------------
