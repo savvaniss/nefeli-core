@@ -73,3 +73,43 @@ set_property(TARGET daemon
   PROPERTY
     OUTPUT_NAME "nefelid")
 install(TARGETS daemon DESTINATION bin)
+
+# -------------------------------------------------------------------------
+# Add a new executable target for generate_genesis_tx
+add_executable(generate_genesis_tx
+    generate_genesis_tx.cpp
+)
+
+target_link_libraries(generate_genesis_tx
+    PRIVATE
+    # Link any libs you need for the “construct_miner_tx” code to compile.
+    # Typically, at minimum:
+      cryptonote_core
+      blockchain_db
+      cncrypto
+      common
+      p2p
+      cryptonote_protocol
+      daemonizer
+      serialization
+      daemon_rpc_server
+      epee           # Often needed for string_tools, etc.
+      version
+
+      # Boost libraries, threads, etc. - re-use the same ones from daemon
+      ${Boost_CHRONO_LIBRARY}
+      ${Boost_FILESYSTEM_LIBRARY}
+      ${Boost_PROGRAM_OPTIONS_LIBRARY}
+      ${Boost_REGEX_LIBRARY}
+      ${Boost_SYSTEM_LIBRARY}
+      ${CMAKE_THREAD_LIBS_INIT}
+      ${ZMQ_LIB}
+      ${GNU_READLINE_LIBRARY}
+      ${EXTRA_LIBRARIES}
+      ${Blocks}
+)
+
+# Optionally rename the executable (not strictly necessary):
+set_property(TARGET generate_genesis_tx
+  PROPERTY
+    OUTPUT_NAME "generate_genesis_tx")
