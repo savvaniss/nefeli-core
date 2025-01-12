@@ -82,6 +82,7 @@ add_executable(generate_genesis_tx
 
 target_link_libraries(generate_genesis_tx
     PRIVATE
+      ${CMAKE_SOURCE_DIR}/src
     # Link any libs you need for the “construct_miner_tx” code to compile.
     # Typically, at minimum:
       cryptonote_core
