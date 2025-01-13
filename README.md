@@ -111,6 +111,7 @@ This model ensures the Nefeli network remains secure, liquid, and accessible whi
 - **Solo Mining:** Supports solo mining to eliminate reliance on large mining pools and promote decentralization.
 - **Privacy-Centric:** Built with robust privacy features to ensure secure and anonymous transactions.
 
+
 ## Getting Started
 
 - **Official Website:** [Coming Soon]
@@ -130,7 +131,15 @@ This project is licensed under the GNU General Public License v3.0 (GPL-3.0). Se
 Nefeli is a fork of the [Wownero cryptocurrency](https://codeberg.org/wownero/wownero), originally developed by the Wownero community. We acknowledge their incredible work in building the foundation of this project.
 
 
-## building from source
+## building from source in an ubuntu 24.04 system
 
-- git clone 
-- sudo apt install -y libunbound-dev  libboost-all-dev
+```bash
+sudo apt update && sudo apt install -y build-essential git cmake ccache libunbound-dev libboost-all-dev libusb-1.0-0-dev libssl-dev libzmq3-dev libminiupnpc-dev # System requirements
+git clone https://github.com/savvaniss/nefeli-core.git && cd nefeli-core && bash external.sh  && sudo make clean && sudo make -j$(nproc) # Project requirements
+```
+
+add-exclusive-node=192.168.1.2:61240   
+
+
+###config
+#add-exclusive-node=192.168.1.2:61240

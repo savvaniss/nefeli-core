@@ -724,7 +724,7 @@ namespace nodetool
     }
     else
     {
-    //  full_addrs.insert("94.64.65.212:61240");   // 01.seed.aurelius.world the initial node.
+      full_addrs.insert("192.168.42:61240");   // 01.seed.aurelius.world the initial node.
     }
     return full_addrs;
   }
